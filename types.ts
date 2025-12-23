@@ -50,6 +50,13 @@ export interface TechStockItem {
   reasoning: string;
 }
 
+export interface SavedTechScan {
+  id: string;
+  name: string;
+  timestamp: number;
+  data: TechStockItem[];
+}
+
 export interface AhpStockItem {
   rank: number;
   ticker: string;

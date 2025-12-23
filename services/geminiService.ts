@@ -171,50 +171,51 @@ export async function getDimeMarketBrief(): Promise<string> {
 
 export async function scanTechStocks(): Promise<TechStockItem[]> {
   const prompt = `
-    Find 6 high-potential Technology stocks (Nasdaq or S&P 500) that are currently attractive for a 1-quarter swing trade (3 months).
+    Find 32 high-potential Technology stocks (Nasdaq or S&P 500) that are currently attractive for a 1-quarter swing trade (3 months).
     Focus on stocks that are fundamentally strong but might be at a technical support level or "Buy Zone".
     
     Use Google Search to get the LATEST price and technical levels.
     
-    Return a JSON array. Each item must contain:
+    Return a JSON array of 32 items. 
+    IMPORTANT: The response must be a RAW JSON ARRAY. Do not use Markdown code blocks.
+    
+    Each item must contain:
     - ticker: Stock Symbol
     - name: Company Name
-    - current_price: Latest approximate price
-    - support_level: The key support price zone (แนวรับ)
-    - resistance_level: The key resistance price zone (แนวต้าน)
-    - target_1q: Price target for next quarter
-    - upside: Potential percentage gain (e.g. "+15%")
+    - current_price: Latest approximate price (string)
+    - support_level: The key support price zone (แนวรับ) (string)
+    - resistance_level: The key resistance price zone (แนวต้าน) (string)
+    - target_1q: Price target for next quarter (string)
+    - upside: Potential percentage gain (e.g. "+15%") (string)
     - reasoning: Short Thai explanation of why it's a buy (Fundamental + Technical)
   `;
 
+  // Switching to Pro model for better handling of large list + search context
+  // Removing strict responseSchema to prevent validation errors with search tool output
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-pro-preview', 
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            ticker: { type: Type.STRING },
-            name: { type: Type.STRING },
-            current_price: { type: Type.STRING },
-            support_level: { type: Type.STRING },
-            resistance_level: { type: Type.STRING },
-            target_1q: { type: Type.STRING },
-            upside: { type: Type.STRING },
-            reasoning: { type: Type.STRING }
-          },
-          required: ["ticker", "name", "current_price", "support_level", "resistance_level", "target_1q", "upside", "reasoning"]
-        }
-      }
     }
   });
 
-  if (!response.text) throw new Error("Tech scan failed.");
-  return JSON.parse(response.text) as TechStockItem[];
+  if (!response.text) throw new Error("Tech scan failed (Empty response).");
+  
+  try {
+      // Clean potential markdown blocks
+      let cleanJson = response.text.trim();
+      if (cleanJson.startsWith('```json')) {
+          cleanJson = cleanJson.replace(/^```json/, '').replace(/```$/, '');
+      } else if (cleanJson.startsWith('```')) {
+          cleanJson = cleanJson.replace(/^```/, '').replace(/```$/, '');
+      }
+      return JSON.parse(cleanJson) as TechStockItem[];
+  } catch (e) {
+      console.error("JSON Parse Error in Tech Scan:", e, response.text);
+      throw new Error("Tech scan failed (Invalid JSON).");
+  }
 }
 
 export async function runAhpRanking(): Promise<AhpStockItem[]> {
@@ -230,10 +231,10 @@ export async function runAhpRanking(): Promise<AhpStockItem[]> {
 
     Task:
     Use Google Search to find current data and screen the S&P 500.
-    Select the Top 12 stocks that score highest across these weighted criteria RIGHT NOW.
+    Select the Top 30 stocks that score highest across these weighted criteria RIGHT NOW.
     
     Return a JSON list sorted by 'rank'. Each item must contain:
-    - rank: 1 to 12
+    - rank: 1 to 30
     - ticker: Stock Symbol
     - company: Company Name
     - sector: Sector

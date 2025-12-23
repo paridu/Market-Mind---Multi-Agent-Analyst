@@ -13,7 +13,7 @@ export const AhpRankingDisplay: React.FC<Props> = ({ data, onSelect }) => {
       <div className="px-4 py-2 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
          <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest font-mono flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-amber-500 rounded-sm"></span>
-            AHP_MODEL_OUTPUT: S&P500_TOP12
+            AHP_MODEL_OUTPUT: S&P500_TOP30
         </div>
         <div className="text-[9px] font-mono text-slate-500">
              W: GR(30) VL(25) MO(25) QL(20)

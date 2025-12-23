@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { runLynchAnalysis, runManagerAnalysis, scanMarketTrends, getDimeMarketBrief, scanTechStocks, runAhpRanking, runMatrixAnalysis } from './services/geminiService';
-import { AnalysisState, TrendItem, TechStockItem, AhpStockItem, MatrixItem, PortfolioItem } from './types';
+import { AnalysisState, TrendItem, TechStockItem, AhpStockItem, MatrixItem, PortfolioItem, SavedTechScan } from './types';
 import { LynchDisplay } from './components/LynchDisplay';
 import { ManagerDisplay } from './components/ManagerDisplay';
 import { LoadingCard } from './components/LoadingCard';
@@ -17,6 +17,9 @@ const App: React.FC = () => {
   
   // Portfolio State
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+
+  // Saved Scans State
+  const [savedTechScans, setSavedTechScans] = useState<SavedTechScan[]>([]);
 
   const [state, setState] = useState<AnalysisState>({
     isLynchLoading: false,
@@ -41,6 +44,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const savedState = localStorage.getItem('marketMindState');
     const savedPortfolio = localStorage.getItem('marketMindPortfolio');
+    const savedScans = localStorage.getItem('marketMindSavedTechScans');
 
     if (savedState) {
         try {
@@ -68,6 +72,14 @@ const App: React.FC = () => {
             console.error("Failed to restore portfolio", e);
         }
     }
+
+    if (savedScans) {
+        try {
+            setSavedTechScans(JSON.parse(savedScans));
+        } catch (e) {
+            console.error("Failed to restore saved scans", e);
+        }
+    }
   }, []);
 
   // Save data to LocalStorage whenever it changes
@@ -87,6 +99,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('marketMindPortfolio', JSON.stringify(portfolioItems));
   }, [portfolioItems]);
+
+  useEffect(() => {
+    localStorage.setItem('marketMindSavedTechScans', JSON.stringify(savedTechScans));
+  }, [savedTechScans]);
   // ---------------------------------
 
   const isAnyLoading = state.isLynchLoading || state.isManagerLoading;
@@ -139,6 +155,19 @@ const App: React.FC = () => {
     try {
       const stocks = await scanTechStocks();
       setState(prev => ({ ...prev, isTechScanning: false, techStocks: stocks }));
+
+      // Auto-save the new scan results
+      const now = new Date();
+      // Format: YYYY-MM-DD HH:mm:ss
+      const formattedDate = now.toISOString().replace('T', ' ').substring(0, 19);
+      const newScan: SavedTechScan = {
+          id: Math.random().toString(36).substr(2, 9),
+          name: formattedDate,
+          timestamp: Date.now(),
+          data: stocks
+      };
+      setSavedTechScans(prev => [newScan, ...prev]);
+
     } catch (err) {
       console.error("Tech scan error", err);
       setState(prev => ({ ...prev, isTechScanning: false, error: "Failed to scan Tech stocks." }));
@@ -165,6 +194,19 @@ const App: React.FC = () => {
         console.error("Matrix error", err);
         setState(prev => ({ ...prev, isMatrixLoading: false, error: "Failed to run Matrix analysis." }));
     }
+  };
+
+  // Saved Scan Handlers
+  const handleRenameTechScan = (id: string, newName: string) => {
+    setSavedTechScans(prev => prev.map(s => s.id === id ? { ...s, name: newName } : s));
+  };
+
+  const handleLoadTechScan = (scan: SavedTechScan) => {
+    setState(prev => ({ ...prev, techStocks: scan.data }));
+  };
+
+  const handleDeleteTechScan = (id: string) => {
+    setSavedTechScans(prev => prev.filter(s => s.id !== id));
   };
 
   const handleSelectTrend = (item: TrendItem) => {
@@ -332,11 +374,13 @@ const App: React.FC = () => {
                 )}
 
                 {activeTab === 'portfolio' && (
-                    <PortfolioDisplay 
-                        items={portfolioItems} 
-                        onAdd={handleAddToPortfolio} 
-                        onRemove={handleRemoveFromPortfolio} 
-                    />
+                    <div className="h-full">
+                        <PortfolioDisplay 
+                            items={portfolioItems} 
+                            onAdd={handleAddToPortfolio} 
+                            onRemove={handleRemoveFromPortfolio} 
+                        />
+                    </div>
                 )}
 
                 {activeTab === 'scan' && (
@@ -384,13 +428,15 @@ const App: React.FC = () => {
                     <div className="h-full">
                          {state.isTechScanning ? (
                              <div className="h-full bg-slate-900 border border-slate-800 animate-pulse rounded-sm"></div>
-                        ) : state.techStocks ? (
-                            <TechScannerDisplay data={state.techStocks} onSelect={handleSelectTech} />
                         ) : ( 
-                            <div className="flex flex-col h-full items-center justify-center text-slate-500 font-mono text-sm gap-2">
-                                <span>No tech data.</span>
-                                <button onClick={handleTechScan} className="text-cyan-500 hover:underline">[ SCAN_TECH ]</button>
-                            </div>
+                            <TechScannerDisplay 
+                                data={state.techStocks || []} 
+                                onSelect={handleSelectTech} 
+                                savedScans={savedTechScans}
+                                onRename={handleRenameTechScan}
+                                onLoad={handleLoadTechScan}
+                                onDelete={handleDeleteTechScan}
+                            />
                          )}
                     </div>
                 )}
