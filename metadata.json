@@ -1,0 +1,5 @@
+{
+  "name": "Market Mind - Multi-Agent Analyst",
+  "description": "A multi-agent system analyzing capital market news from different personas: a Professional Fund Manager and Peter Lynch.",
+  "requestFramePermissions": []
+}
