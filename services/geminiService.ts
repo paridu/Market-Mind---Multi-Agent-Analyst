@@ -241,44 +241,35 @@ export async function runAhpRanking(): Promise<AhpStockItem[]> {
     - ahp_score: A calculated total score from 0-100 based on your AHP simulation.
     - factors: An object with sub-scores (0-10) for 'value', 'growth', 'momentum', 'quality'.
     - reasoning: A 1-sentence explanation of why it ranks high (in Thai).
+    
+    IMPORTANT: Return raw JSON. No Markdown.
   `;
 
+  // Upgraded to gemini-3-pro-preview to match Tech Scan stability and avoid 403 errors on Flash with complex Search tools.
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-pro-preview',
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            rank: { type: Type.INTEGER },
-            ticker: { type: Type.STRING },
-            company: { type: Type.STRING },
-            sector: { type: Type.STRING },
-            ahp_score: { type: Type.NUMBER },
-            factors: {
-              type: Type.OBJECT,
-              properties: {
-                value: { type: Type.NUMBER },
-                growth: { type: Type.NUMBER },
-                momentum: { type: Type.NUMBER },
-                quality: { type: Type.NUMBER }
-              },
-              required: ["value", "growth", "momentum", "quality"]
-            },
-            reasoning: { type: Type.STRING }
-          },
-          required: ["rank", "ticker", "company", "sector", "ahp_score", "factors", "reasoning"]
-        }
-      }
+      // strict responseSchema removed to improve stability with Search grounding
     }
   });
 
-  if (!response.text) throw new Error("AHP Ranking failed.");
-  return JSON.parse(response.text) as AhpStockItem[];
+  if (!response.text) throw new Error("AHP Ranking failed (Empty response).");
+
+  try {
+      let cleanJson = response.text.trim();
+      if (cleanJson.startsWith('```json')) {
+          cleanJson = cleanJson.replace(/^```json/, '').replace(/```$/, '');
+      } else if (cleanJson.startsWith('```')) {
+          cleanJson = cleanJson.replace(/^```/, '').replace(/```$/, '');
+      }
+      return JSON.parse(cleanJson) as AhpStockItem[];
+  } catch (e) {
+      console.error("JSON Parse Error in AHP Scan:", e, response.text);
+      throw new Error("AHP scan failed (Invalid JSON).");
+  }
 }
 
 export async function runMatrixAnalysis(): Promise<MatrixItem[]> {
