@@ -88,6 +88,17 @@ export interface PortfolioItem {
   avgPrice: number;
 }
 
+export interface CryptoData {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  market_cap: number;
+  market_cap_rank: number;
+  price_change_percentage_24h: number;
+}
+
 export interface AnalysisState {
   isLynchLoading: boolean;
   isManagerLoading: boolean;
@@ -96,6 +107,7 @@ export interface AnalysisState {
   isTechScanning: boolean;
   isAhpLoading: boolean;
   isMatrixLoading: boolean;
+  isCryptoLoading: boolean;
   error: string | null;
   lynchResult: PeterLynchResult | null;
   managerResult: FundManagerResult | null;
@@ -104,6 +116,7 @@ export interface AnalysisState {
   techStocks: TechStockItem[] | null;
   ahpRanking: AhpStockItem[] | null;
   matrixData: MatrixItem[] | null;
+  cryptoData: CryptoData[] | null;
   rpmCount: number;
   totalRequests: number;
   apiTier: 'FREE' | 'PRO';
