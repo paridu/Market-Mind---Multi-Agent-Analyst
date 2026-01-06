@@ -1,3 +1,4 @@
+
 export enum LynchCategory {
   SLOW_GROWERS = 'Slow Growers',
   STALWARTS = 'Stalwarts',
@@ -103,4 +104,7 @@ export interface AnalysisState {
   techStocks: TechStockItem[] | null;
   ahpRanking: AhpStockItem[] | null;
   matrixData: MatrixItem[] | null;
+  rpmCount: number;
+  totalRequests: number;
+  apiTier: 'FREE' | 'PRO';
 }
