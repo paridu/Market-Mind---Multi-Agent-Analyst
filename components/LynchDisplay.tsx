@@ -46,11 +46,16 @@ export const LynchDisplay: React.FC<Props> = ({ data }) => {
           </div>
       </div>
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
           <div className="text-xl font-bold text-white font-mono">{data.ticker}</div>
           <div className={`text-[10px] uppercase px-2 py-0.5 border rounded-sm font-mono ${getCategoryColor(data.category)}`}>
               {data.category}
           </div>
+      </div>
+      
+      <div className="flex items-center gap-2 mb-4 text-xs font-mono bg-slate-900/30 p-2 rounded-sm border border-slate-800/50">
+         <span className="text-slate-500 uppercase tracking-tight">TREND:</span>
+         <span className="text-slate-300">{data.price_trend}</span>
       </div>
 
       <div className="mb-4">

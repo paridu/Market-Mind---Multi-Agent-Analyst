@@ -15,8 +15,8 @@ export const AhpRankingDisplay: React.FC<Props> = ({ data, onSelect }) => {
             <span className="w-1.5 h-1.5 bg-amber-500 rounded-sm"></span>
             AHP_MODEL_OUTPUT: S&P500_TOP30
         </div>
-        <div className="text-[9px] font-mono text-slate-500">
-             W: GR(30) VL(25) MO(25) QL(20)
+        <div className="text-[9px] font-mono text-slate-500 font-thai">
+             W: เติบโต(30) คุ้มค่า(25) โมเมนตัม(25) คุณภาพ(20)
         </div>
       </div>
 
@@ -53,13 +53,13 @@ export const AhpRankingDisplay: React.FC<Props> = ({ data, onSelect }) => {
                                 <div className="flex-1 flex flex-col gap-1">
                                     {/* Mini Bar Chart */}
                                     <div className="flex gap-0.5 h-6 items-end">
-                                        <div className="bg-purple-500/80 w-1/4 hover:bg-purple-400 transition-colors" style={{ height: `${item.factors.growth * 10}%` }} title={`Growth: ${item.factors.growth}`}></div>
-                                        <div className="bg-emerald-500/80 w-1/4 hover:bg-emerald-400 transition-colors" style={{ height: `${item.factors.value * 10}%` }} title={`Value: ${item.factors.value}`}></div>
-                                        <div className="bg-blue-500/80 w-1/4 hover:bg-blue-400 transition-colors" style={{ height: `${item.factors.momentum * 10}%` }} title={`Momentum: ${item.factors.momentum}`}></div>
-                                        <div className="bg-slate-400/80 w-1/4 hover:bg-slate-300 transition-colors" style={{ height: `${item.factors.quality * 10}%` }} title={`Quality: ${item.factors.quality}`}></div>
+                                        <div className="bg-purple-500/80 w-1/4 hover:bg-purple-400 transition-colors" style={{ height: `${item.factors.growth * 10}%` }} title={`การเติบโต: ${item.factors.growth}`}></div>
+                                        <div className="bg-emerald-500/80 w-1/4 hover:bg-emerald-400 transition-colors" style={{ height: `${item.factors.value * 10}%` }} title={`ความคุ้มค่า: ${item.factors.value}`}></div>
+                                        <div className="bg-blue-500/80 w-1/4 hover:bg-blue-400 transition-colors" style={{ height: `${item.factors.momentum * 10}%` }} title={`โมเมนตัม: ${item.factors.momentum}`}></div>
+                                        <div className="bg-slate-400/80 w-1/4 hover:bg-slate-300 transition-colors" style={{ height: `${item.factors.quality * 10}%` }} title={`คุณภาพ: ${item.factors.quality}`}></div>
                                     </div>
-                                    <div className="flex justify-between text-[8px] text-slate-600 uppercase">
-                                        <span>Gr</span><span>Vl</span><span>Mo</span><span>Ql</span>
+                                    <div className="flex justify-between text-[8px] text-slate-600 font-thai">
+                                        <span>โต</span><span>คุ้ม</span><span>โม</span><span>ดี</span>
                                     </div>
                                 </div>
                             </div>
